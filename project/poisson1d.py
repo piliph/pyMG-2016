@@ -24,7 +24,7 @@ class Poisson1D(ProblemBase):
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
-        self.dx = 1.0 / (ndofs)
+        self.dx = 1.0 / (ndofs + 1)
         # compute system matrix A, scale by 1/dx^2
         A = 1.0 / (self.dx ** 2) * self.__get_system_matrix(ndofs)
         rhs = self.__get_rhs(ndofs)
