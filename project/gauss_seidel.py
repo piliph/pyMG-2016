@@ -28,8 +28,8 @@ class GaussSeidel(SmootherBase):
 
         self.D = sp.spdiags(self.A.diagonal(), 0, self.A.shape[0], self.A.shape[1],
                             format='csc')
-        self.L = sp.tril(self.A)
-        self.U = sp.triu(self.A)
+        self.L = sp.tril(self.A, k=-1)
+        self.U = sp.triu(self.A, k=1)
         # precompute inverse of the preconditioner for later usage
         self.DLinv = spLA.inv(self.D + self.L)
 
@@ -47,5 +47,5 @@ class GaussSeidel(SmootherBase):
             numpy.ndarray: the smoothed solution u_new of size
                 :attr:`pymg.problem_base.ProblemBase.ndofs`
         """
-        u_new = u_old + self.DLinv.dot(rhs - self.U.dot(u_old))
+        u_new = self.DLinv.dot(rhs - self.U.dot(u_old))
         return u_new
