@@ -14,6 +14,26 @@ class MyMultigrid(MultigridBase):
         assert np.log2(ndofs+1) >= nlevels
         super(MyMultigrid, self).__init__(ndofs, nlevels)
 
+    def do_fmg_cycle_recursive(self, rhs, h, nu0, nu1, nu2):
+        # set intial conditions (note: resetting vectors here is important!)
+        self.fh[0] = rhs
+
+        # downward cycle
+        if (h < self.nlevels - 1):
+            self.fh[h + 1] = self.trans[h].restrict(self.fh[h])
+            self.vh[h + 1] = self.do_fmg_cycle_recursive(self.fh[h + 1], h + 1, nu0, nu1, nu2)
+        else:
+            self.vh[-1] = sLA.spsolve(self.Acoarse, self.fh[-1])
+            return self.vh[-1]
+
+        # correct
+        self.vh[h] = self.trans[h].prolong(self.vh[h + 1])
+
+        for i in range(nu0):
+            self.vh[h] = self.do_v_cycle(self.vh[h], self.fh[h], nu1, nu2, h)
+
+        return self.vh[h]
+
     def do_v_cycle(self, v0, rhs, nu1, nu2, lstart):
         """Straightforward implementation of a V-cycle
 
