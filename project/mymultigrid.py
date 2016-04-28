@@ -3,6 +3,8 @@ import numpy as np
 
 from pymg.multigrid_base import MultigridBase
 
+import matplotlib.pyplot as plt
+
 
 class MyMultigrid(MultigridBase):
     """Implementation of a multigrid solver with different cycle implementations
@@ -21,6 +23,7 @@ class MyMultigrid(MultigridBase):
         # downward cycle
         if (h < self.nlevels - 1):
             self.fh[h + 1] = self.trans[h].restrict(self.fh[h])
+            plt.plot(h, self.fh[h])
             self.vh[h + 1] = self.do_fmg_cycle_recursive(self.fh[h + 1], h + 1, nu0, nu1, nu2)
         else:
             self.vh[-1] = sLA.spsolve(self.Acoarse, self.fh[-1])
